@@ -2041,7 +2041,8 @@
   <!-- ================================================================
        Document Collection & Archive Exfiltration Pipeline
        Three-tier escalating detection:
-         Tier 1 (level 10):  Bulk document collection into local folders
+         Tier 1 (level 3 base / level 10 frequency):
+                             Bulk document collection into local folders
          Tier 2 (level 12):  Archive/compression of collected documents
          Tier 3 (level 14):  Transfer of archive to external system
        Covers: Windows, Linux, macOS, Office 365, Google Workspace,
@@ -2374,7 +2375,7 @@
     <group>dlp_doc_collection,dlp_synology,data_staging,</group>
   </rule>
 
-  <!-- Tier 3: Archive file on NAS moved to external destination -->
+  <!-- Tier 3: Archive file on NAS moved to external destination (chains from 150204: archive created on NAS) -->
   <rule id="150244" level="14">
     <if_sid>150204</if_sid>
     <field name="data" type="pcre2">(?i)/(USB|External|Remote|Cloud|backup|offsite)</field>
