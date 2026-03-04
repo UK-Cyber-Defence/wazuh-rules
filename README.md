@@ -6,6 +6,59 @@ Community-driven collection of custom [Wazuh](https://wazuh.com/) SIEM detection
 
 This repository provides production-ready Wazuh rule files that extend the default Wazuh ruleset with focused detection capabilities. Each rule file targets a specific threat domain and is mapped to the [MITRE ATT&CK](https://attack.mitre.org/) framework.
 
+### Forcepoint Rules
+
+**File:** `rules/100725-Forcepoint.xml` · **Decoder:** `decoders/Forcepoint.xml` · **Rule IDs:** 107250–107254 · **5 rules**
+
+Detects security-relevant events from Forcepoint appliances including blocked traffic, failed authentication, system errors, and password changes. A custom decoder is included to parse Forcepoint traffic, system, and audit log formats.
+
+#### Detection Categories
+
+| Category | Examples |
+|---|---|
+| Traffic — Blocked Connections | Connection attempts blocked by Forcepoint policy |
+| Audit — Failed Actions | Failed administrative or user actions |
+| System — Errors | Error conditions reported by Forcepoint components |
+| Audit — Password Changes | Password change events |
+
+#### Severity Levels
+
+| Level | Meaning | Count |
+|-------|---------|-------|
+| 0 | Base rule (internal grouping) | 1 |
+| 13 | Very high-severity event | 2 |
+| 14 | Critical event | 1 |
+| 15 | Maximum-severity event | 1 |
+
+---
+
+### Google Workspace Audit Log Rules
+
+**File:** `rules/108500-google_workspace.xml` · **Rule IDs:** 108500–108599 · **10 rules**
+
+Provides base detection for Google Workspace audit events ingested via the Wazuh gcloud module or a custom integration.
+
+#### Covered Applications
+
+| Application | Description | Rule ID |
+|---|---|---|
+| *(all)* | Base Google Workspace audit event | 108500 |
+| `drive` | Google Drive file operations | 108501 |
+| `admin` | Admin console activities | 108510 |
+| `login` | Authentication events | 108520 |
+| `token` | OAuth token activities | 108530 |
+| `groups` | Google Groups management | 108540 |
+| `rules` | DLP and alerting rules | 108550 |
+| `user_accounts` | User account management | 108560 |
+| `mobile` | Mobile device management | 108570 |
+| `saml` | SAML SSO events | 108580 |
+
+#### MITRE ATT&CK Coverage
+
+`T1078` `T1136` `T1528`
+
+---
+
 ### Data Loss Prevention (DLP) Rules
 
 **File:** `rules/150000-data_loss_prevention.xml` · **Rule IDs:** 150000–150163 · **114 rules**
@@ -48,10 +101,11 @@ Rules are mapped to the following techniques:
 
 ## Installation
 
-1. Copy the rule file(s) to your Wazuh manager's custom rules directory:
+1. Copy the rule and decoder files to your Wazuh manager:
 
    ```bash
-   sudo cp rules/150000-data_loss_prevention.xml /var/ossec/etc/rules/
+   sudo cp rules/*.xml /var/ossec/etc/rules/
+   sudo cp decoders/*.xml /var/ossec/etc/decoders/
    ```
 
 2. Verify the rules are valid:
@@ -66,26 +120,31 @@ Rules are mapped to the following techniques:
    sudo systemctl restart wazuh-manager
    ```
 
-> **Note:** Rule IDs in this repository start at **150000** to avoid conflicts with the default Wazuh ruleset (0–100999) and other common community rules.
+> **Note:** Rule IDs in this repository use dedicated ranges to avoid conflicts with the default Wazuh ruleset (0–100999) and other common community rules.
 
 ## Prerequisites
 
 - [Wazuh](https://wazuh.com/) 4.x or later
 - [Sysmon](https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon) deployed on monitored endpoints (Windows, Linux, or macOS) for Sysmon-based rules
 - Office 365 and/or AWS integrations configured in Wazuh for the corresponding cloud rules
+- Google Workspace audit log ingestion via the Wazuh gcloud module or custom integration for Google Workspace rules
+- Forcepoint syslog forwarding configured for Forcepoint rules
 
 ## Severity Levels
 
-Rules use the following Wazuh severity levels:
+Rules across all files use the following Wazuh severity levels:
 
 | Level | Meaning | Count |
 |-------|---------|-------|
-| 3 | Low-interest event | 1 |
+| 0 | Base rule (internal grouping) | 1 |
+| 3 | Low-interest event | 7 |
+| 5 | Moderate event | 4 |
 | 8 | Notable event | 4 |
 | 10 | Suspicious activity | 39 |
 | 12 | High-severity event | 39 |
-| 13 | Very high-severity event | 15 |
-| 14 | Critical event | 16 |
+| 13 | Very high-severity event | 17 |
+| 14 | Critical event | 17 |
+| 15 | Maximum-severity event | 1 |
 
 ## Contributing
 
@@ -104,6 +163,8 @@ To prevent conflicts, each rule file uses a dedicated ID range:
 
 | File | ID Range |
 |---|---|
+| `rules/100725-Forcepoint.xml` | 107250–107254 |
+| `rules/108500-google_workspace.xml` | 108500–108599 |
 | `rules/150000-data_loss_prevention.xml` | 150000–150199 |
 
 When adding a new rule file, choose an unused range and document it in this table.
