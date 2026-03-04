@@ -8,7 +8,7 @@ This repository provides production-ready Wazuh rule files that extend the defau
 
 ### Data Loss Prevention (DLP) Rules
 
-**File:** `150000-data_loss_prevention.xml` · **Rule IDs:** 150000–150163 · **114 rules**
+**File:** `rules/150000-data_loss_prevention.xml` · **Rule IDs:** 150000–150163 · **114 rules**
 
 Detects data exfiltration, unauthorised transfers, and sensitive-data exposure across Windows, Linux, and macOS endpoints, as well as cloud platforms.
 
@@ -51,7 +51,7 @@ Rules are mapped to the following techniques:
 1. Copy the rule file(s) to your Wazuh manager's custom rules directory:
 
    ```bash
-   sudo cp 150000-data_loss_prevention.xml /var/ossec/etc/rules/
+   sudo cp rules/150000-data_loss_prevention.xml /var/ossec/etc/rules/
    ```
 
 2. Verify the rules are valid:
@@ -104,7 +104,7 @@ To prevent conflicts, each rule file uses a dedicated ID range:
 
 | File | ID Range |
 |---|---|
-| `150000-data_loss_prevention.xml` | 150000–150199 |
+| `rules/150000-data_loss_prevention.xml` | 150000–150199 |
 
 When adding a new rule file, choose an unused range and document it in this table.
 
