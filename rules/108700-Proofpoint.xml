@@ -1,14 +1,14 @@
 <!--
-  ProofPoint Rules
+  Proofpoint Rules
   Rule IDs: 108700–108799
 
-  Provides detection for ProofPoint email security events ingested
-  via a direct API integration (e.g. the ProofPoint TAP API) or
+  Provides detection for Proofpoint email security events ingested
+  via a direct API integration (e.g. the Proofpoint TAP API) or
   syslog forwarding.
 
-  ProofPoint Areas Covered:
+  Proofpoint Areas Covered:
     Messages             — Blocked and delivered threat messages
-    Phishing             — Phishing attempts detected by ProofPoint
+    Phishing             — Phishing attempts detected by Proofpoint
     Malware              — Malware attachments and URLs
     Impostor / BEC       — Business Email Compromise and impostor detection
     Click Protection     — Permitted and blocked clicks on malicious URLs
@@ -21,22 +21,22 @@
 
 <group name="proofpoint,">
 
-  <!-- ===== Base ProofPoint Rule (JSON via API integration) ===== -->
+  <!-- ===== Base Proofpoint Rule (JSON via API integration) ===== -->
 
   <rule id="108700" level="3">
     <decoded_as>json</decoded_as>
     <field name="type" type="pcre2">(?i)^(?:message|click)$</field>
     <field name="guid">\.</field>
-    <description>ProofPoint: $(type) event detected.</description>
+    <description>Proofpoint: $(type) event detected.</description>
     <options>no_full_log</options>
     <group>proofpoint_base,</group>
   </rule>
 
-  <!-- ===== Base ProofPoint Rule (syslog-forwarded) ===== -->
+  <!-- ===== Base Proofpoint Rule (syslog-forwarded) ===== -->
 
   <rule id="108701" level="3">
     <decoded_as>proofpoint</decoded_as>
-    <description>ProofPoint: Syslog event detected.</description>
+    <description>Proofpoint: Syslog event detected.</description>
     <options>no_full_log</options>
     <group>proofpoint_base,</group>
   </rule>
@@ -46,7 +46,7 @@
   <rule id="108710" level="10">
     <if_sid>108700</if_sid>
     <field name="disposition" type="pcre2">(?i)blocked</field>
-    <description>ProofPoint: Threat message blocked — $(subject).</description>
+    <description>Proofpoint: Threat message blocked — $(subject).</description>
     <mitre>
       <id>T1566</id>
     </mitre>
@@ -58,7 +58,7 @@
     <if_sid>108700</if_sid>
     <field name="disposition" type="pcre2">(?i)delivered</field>
     <field name="threatsInfoMap">\.</field>
-    <description>ProofPoint: Threat message delivered — $(subject).</description>
+    <description>Proofpoint: Threat message delivered — $(subject).</description>
     <mitre>
       <id>T1566</id>
     </mitre>
@@ -69,7 +69,7 @@
   <rule id="108712" level="8">
     <if_sid>108700</if_sid>
     <field name="disposition" type="pcre2">(?i)quarantined</field>
-    <description>ProofPoint: Message quarantined — $(subject).</description>
+    <description>Proofpoint: Message quarantined — $(subject).</description>
     <options>no_full_log</options>
     <group>proofpoint_message,email_quarantined,</group>
   </rule>
@@ -79,7 +79,7 @@
   <rule id="108720" level="10">
     <if_sid>108700</if_sid>
     <field name="classification" type="pcre2">(?i)phish</field>
-    <description>ProofPoint: Phishing attempt detected — $(subject).</description>
+    <description>Proofpoint: Phishing attempt detected — $(subject).</description>
     <mitre>
       <id>T1566.001</id>
     </mitre>
@@ -90,7 +90,7 @@
   <rule id="108721" level="12">
     <if_sid>108720</if_sid>
     <field name="disposition" type="pcre2">(?i)delivered</field>
-    <description>ProofPoint: Phishing message delivered to user — $(subject).</description>
+    <description>Proofpoint: Phishing message delivered to user — $(subject).</description>
     <mitre>
       <id>T1566.001</id>
     </mitre>
@@ -103,7 +103,7 @@
   <rule id="108730" level="10">
     <if_sid>108700</if_sid>
     <field name="classification" type="pcre2">(?i)malware</field>
-    <description>ProofPoint: Malware detected — $(subject).</description>
+    <description>Proofpoint: Malware detected — $(subject).</description>
     <mitre>
       <id>T1566.001</id>
       <id>T1204.002</id>
@@ -115,7 +115,7 @@
   <rule id="108731" level="14">
     <if_sid>108730</if_sid>
     <field name="disposition" type="pcre2">(?i)delivered</field>
-    <description>ProofPoint: Malware delivered to user — $(subject).</description>
+    <description>Proofpoint: Malware delivered to user — $(subject).</description>
     <mitre>
       <id>T1566.001</id>
       <id>T1204.002</id>
@@ -129,7 +129,7 @@
   <rule id="108740" level="12">
     <if_sid>108700</if_sid>
     <field name="classification" type="pcre2">(?i)impostor</field>
-    <description>ProofPoint: Impostor/BEC attempt detected — $(subject).</description>
+    <description>Proofpoint: Impostor/BEC attempt detected — $(subject).</description>
     <mitre>
       <id>T1566.002</id>
       <id>T1534</id>
@@ -141,7 +141,7 @@
   <rule id="108741" level="14">
     <if_sid>108740</if_sid>
     <field name="disposition" type="pcre2">(?i)delivered</field>
-    <description>ProofPoint: Impostor/BEC message delivered to user — $(subject).</description>
+    <description>Proofpoint: Impostor/BEC message delivered to user — $(subject).</description>
     <mitre>
       <id>T1566.002</id>
       <id>T1534</id>
@@ -156,7 +156,7 @@
     <if_sid>108700</if_sid>
     <field name="type" type="pcre2">(?i)click</field>
     <field name="disposition" type="pcre2">(?i)blocked</field>
-    <description>ProofPoint: Malicious URL click blocked — $(url).</description>
+    <description>Proofpoint: Malicious URL click blocked — $(url).</description>
     <mitre>
       <id>T1204.001</id>
     </mitre>
@@ -168,7 +168,7 @@
     <if_sid>108700</if_sid>
     <field name="type" type="pcre2">(?i)click</field>
     <field name="disposition" type="pcre2">(?i)permitted</field>
-    <description>ProofPoint: User clicked malicious URL — $(url).</description>
+    <description>Proofpoint: User clicked malicious URL — $(url).</description>
     <mitre>
       <id>T1204.001</id>
     </mitre>
@@ -181,7 +181,7 @@
   <rule id="108760" level="3">
     <if_sid>108700</if_sid>
     <field name="classification" type="pcre2">(?i)spam</field>
-    <description>ProofPoint: Spam detected — $(subject).</description>
+    <description>Proofpoint: Spam detected — $(subject).</description>
     <options>no_full_log</options>
     <group>proofpoint_spam,</group>
   </rule>
@@ -189,7 +189,7 @@
   <rule id="108761" level="5">
     <if_sid>108760</if_sid>
     <field name="disposition" type="pcre2">(?i)delivered</field>
-    <description>ProofPoint: Spam message delivered to user — $(subject).</description>
+    <description>Proofpoint: Spam message delivered to user — $(subject).</description>
     <options>no_full_log</options>
     <group>proofpoint_spam,email_delivered_threat,</group>
   </rule>
@@ -199,7 +199,7 @@
   <rule id="108770" level="10">
     <if_sid>108700</if_sid>
     <field name="classification" type="pcre2">(?i)dlp</field>
-    <description>ProofPoint DLP: Policy violation detected — $(subject).</description>
+    <description>Proofpoint DLP: Policy violation detected — $(subject).</description>
     <mitre>
       <id>T1048</id>
     </mitre>
@@ -210,7 +210,7 @@
   <rule id="108771" level="12">
     <if_sid>108770</if_sid>
     <field name="disposition" type="pcre2">(?i)blocked</field>
-    <description>ProofPoint DLP: Message blocked by DLP policy — $(subject).</description>
+    <description>Proofpoint DLP: Message blocked by DLP policy — $(subject).</description>
     <mitre>
       <id>T1048</id>
     </mitre>
@@ -223,7 +223,7 @@
   <rule id="108780" level="5">
     <if_sid>108700</if_sid>
     <field name="action" type="pcre2">(?i)quarantine</field>
-    <description>ProofPoint: Message moved to quarantine — $(subject).</description>
+    <description>Proofpoint: Message moved to quarantine — $(subject).</description>
     <options>no_full_log</options>
     <group>proofpoint_quarantine,</group>
   </rule>
@@ -231,7 +231,7 @@
   <rule id="108781" level="8">
     <if_sid>108700</if_sid>
     <field name="action" type="pcre2">(?i)released</field>
-    <description>ProofPoint: Message released from quarantine — $(subject).</description>
+    <description>Proofpoint: Message released from quarantine — $(subject).</description>
     <mitre>
       <id>T1562.001</id>
     </mitre>
@@ -244,7 +244,7 @@
   <rule id="108790" level="5">
     <if_sid>108700</if_sid>
     <field name="action" type="pcre2">(?i)policyChanged</field>
-    <description>ProofPoint: Security policy modified.</description>
+    <description>Proofpoint: Security policy modified.</description>
     <mitre>
       <id>T1562.001</id>
     </mitre>
@@ -255,7 +255,7 @@
   <rule id="108791" level="10">
     <if_sid>108700</if_sid>
     <field name="action" type="pcre2">(?i)policyRemoved</field>
-    <description>ProofPoint: Security policy removed.</description>
+    <description>Proofpoint: Security policy removed.</description>
     <mitre>
       <id>T1562.001</id>
     </mitre>
@@ -266,7 +266,7 @@
   <rule id="108792" level="10">
     <if_sid>108700</if_sid>
     <field name="action" type="pcre2">(?i)allowListModified</field>
-    <description>ProofPoint: Allow list modified.</description>
+    <description>Proofpoint: Allow list modified.</description>
     <mitre>
       <id>T1562.001</id>
     </mitre>

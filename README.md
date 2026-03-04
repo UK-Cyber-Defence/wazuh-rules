@@ -84,17 +84,17 @@ Detects security-relevant events from Microsoft Purview ingested via the Wazuh O
 
 ---
 
-### ProofPoint Rules
+### Proofpoint Rules
 
-**File:** `rules/108700-ProofPoint.xml` · **Decoder:** `decoders/ProofPoint.xml` · **Rule IDs:** 108700–108792 · **25 rules**
+**File:** `rules/108700-Proofpoint.xml` · **Decoder:** `decoders/Proofpoint.xml` · **Rule IDs:** 108700–108792 · **25 rules**
 
-Detects security-relevant events from ProofPoint email security products ingested via a direct API integration (e.g. the ProofPoint TAP API) or syslog forwarding. A custom decoder is included to parse syslog-forwarded ProofPoint events.
+Detects security-relevant events from Proofpoint email security products ingested via a direct API integration (e.g. the Proofpoint TAP API) or syslog forwarding. A custom decoder is included to parse syslog-forwarded Proofpoint events.
 
 #### Covered Areas
 
 | Area | Description | Rule IDs |
 |---|---|---|
-| *(all)* | Base ProofPoint event (JSON / syslog) | 108700–108701 |
+| *(all)* | Base Proofpoint event (JSON / syslog) | 108700–108701 |
 | Messages | Blocked, delivered, and quarantined threat messages | 108710–108712 |
 | Phishing | Phishing attempts and delivered phishing | 108720–108721 |
 | Malware | Malware attachments and URLs | 108730–108731 |
@@ -182,7 +182,7 @@ Rules are mapped to the following techniques:
 - Google Workspace audit log ingestion via the Wazuh gcloud module or custom integration for Google Workspace rules
 - Microsoft Purview audit log ingestion via the Wazuh Office 365 module or syslog forwarding for Purview rules
 - Forcepoint syslog forwarding configured for Forcepoint rules
-- ProofPoint TAP API integration or syslog forwarding configured for ProofPoint rules
+- Proofpoint TAP API integration or syslog forwarding configured for Proofpoint rules
 
 ## Severity Levels
 
@@ -220,7 +220,7 @@ To prevent conflicts, each rule file uses a dedicated ID range:
 | `rules/100725-Forcepoint.xml` | 107250–107254 |
 | `rules/108500-google_workspace.xml` | 108500–108599 |
 | `rules/108600-Microsoft_Purview.xml` | 108600–108699 |
-| `rules/108700-ProofPoint.xml` | 108700–108799 |
+| `rules/108700-Proofpoint.xml` | 108700–108799 |
 | `rules/150000-data_loss_prevention.xml` | 150000–150199 |
 
 When adding a new rule file, choose an unused range and document it in this table.
