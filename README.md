@@ -84,6 +84,33 @@ Detects security-relevant events from Microsoft Purview ingested via the Wazuh O
 
 ---
 
+### ProofPoint Rules
+
+**File:** `rules/108700-ProofPoint.xml` · **Decoder:** `decoders/ProofPoint.xml` · **Rule IDs:** 108700–108792 · **25 rules**
+
+Detects security-relevant events from ProofPoint email security products ingested via a direct API integration (e.g. the ProofPoint TAP API) or syslog forwarding. A custom decoder is included to parse syslog-forwarded ProofPoint events.
+
+#### Covered Areas
+
+| Area | Description | Rule IDs |
+|---|---|---|
+| *(all)* | Base ProofPoint event (JSON / syslog) | 108700–108701 |
+| Messages | Blocked, delivered, and quarantined threat messages | 108710–108712 |
+| Phishing | Phishing attempts and delivered phishing | 108720–108721 |
+| Malware | Malware attachments and URLs | 108730–108731 |
+| Impostor / BEC | Business Email Compromise and impostor detection | 108740–108741 |
+| Click Protection | Blocked and permitted clicks on malicious URLs | 108750–108751 |
+| Spam | Spam detection and delivered spam | 108760–108761 |
+| DLP | Email Data Loss Prevention policy violations | 108770–108771 |
+| Quarantine | Quarantine actions and releases | 108780–108781 |
+| Admin / Config | Policy changes and allow list modifications | 108790–108792 |
+
+#### MITRE ATT&CK Coverage
+
+`T1048` `T1204.001` `T1204.002` `T1534` `T1562.001` `T1566` `T1566.001` `T1566.002`
+
+---
+
 ### Data Loss Prevention (DLP) Rules
 
 **File:** `rules/150000-data_loss_prevention.xml` · **Rule IDs:** 150000–150163 · **114 rules**
@@ -155,6 +182,7 @@ Rules are mapped to the following techniques:
 - Google Workspace audit log ingestion via the Wazuh gcloud module or custom integration for Google Workspace rules
 - Microsoft Purview audit log ingestion via the Wazuh Office 365 module or syslog forwarding for Purview rules
 - Forcepoint syslog forwarding configured for Forcepoint rules
+- ProofPoint TAP API integration or syslog forwarding configured for ProofPoint rules
 
 ## Severity Levels
 
@@ -192,6 +220,7 @@ To prevent conflicts, each rule file uses a dedicated ID range:
 | `rules/100725-Forcepoint.xml` | 107250–107254 |
 | `rules/108500-google_workspace.xml` | 108500–108599 |
 | `rules/108600-Microsoft_Purview.xml` | 108600–108699 |
+| `rules/108700-ProofPoint.xml` | 108700–108799 |
 | `rules/150000-data_loss_prevention.xml` | 150000–150199 |
 
 When adding a new rule file, choose an unused range and document it in this table.
