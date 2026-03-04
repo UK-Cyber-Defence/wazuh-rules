@@ -1,6 +1,6 @@
 <!--
   Data Loss Prevention (DLP) Rules
-  Rule IDs: 150000–150218
+  Rule IDs: 150000–150244
   Author:   Peter Bassill /// UK Cyber Defence (peter@cyber-defence.io)
   Detects common data exfiltration, unauthorized transfers,
   and sensitive-data exposure indicators.
@@ -2036,6 +2036,355 @@
     </mitre>
     <options>no_full_log</options>
     <group>dlp_email_bulk_exfil,data_exfiltration,</group>
+  </rule>
+
+  <!-- ================================================================
+       Document Collection & Archive Exfiltration Pipeline
+       Three-tier escalating detection:
+         Tier 1 (level 3 base / level 10 frequency):
+                             Bulk document collection into local folders
+         Tier 2 (level 12):  Archive/compression of collected documents
+         Tier 3 (level 14):  Transfer of archive to external system
+       Covers: Windows, Linux, macOS, Office 365, Google Workspace,
+               and Synology NAS
+       ================================================================ -->
+
+  <!-- ===== Windows — Tier 1: Document Collection in Local Folders ===== -->
+
+  <!-- Base rule: document file created in user profile directory (for frequency counting) -->
+  <rule id="150219" level="3">
+    <if_sid>61613</if_sid>
+    <field name="win.eventdata.targetFilename" type="pcre2">(?i)\\Users\\[^\\]+\\(?!AppData\\).*\.(docx?|xlsx?|pptx?|pdf|csv|txt|rtf|odt|ods|odp)$</field>
+    <description>DLP: Document file created in user profile directory — $(win.eventdata.targetFilename).</description>
+    <mitre>
+      <id>T1074.001</id>
+    </mitre>
+    <options>no_full_log</options>
+    <group>dlp_doc_collection,data_staging,sysmon_event_11,</group>
+  </rule>
+
+  <!-- Frequency: bulk document collection — multiple documents staged in user folders -->
+  <rule id="150220" level="10" frequency="10" timeframe="300">
+    <if_matched_sid>150219</if_matched_sid>
+    <description>DLP: Bulk document collection detected — multiple documents created in user profile directory within 5 minutes — possible local data staging.</description>
+    <mitre>
+      <id>T1074.001</id>
+      <id>T1119</id>
+    </mitre>
+    <options>no_full_log</options>
+    <group>dlp_doc_collection,data_staging,sysmon_event_11,</group>
+  </rule>
+
+  <!-- ===== Windows — Tier 2: Archive of Collected Documents ===== -->
+
+  <!-- Sysmon Event 11: archive file created in user profile directory (not temp) -->
+  <rule id="150221" level="12">
+    <if_sid>61613</if_sid>
+    <field name="win.eventdata.targetFilename" type="pcre2">(?i)\\Users\\[^\\]+\\(?!AppData\\Local\\Temp\\).*\.(zip|7z|rar|tar|gz|tgz|bz2|xz|cab)$</field>
+    <description>DLP: Archive file created in user profile directory by $(win.eventdata.image) — possible compression of collected documents for exfiltration.</description>
+    <mitre>
+      <id>T1560.001</id>
+      <id>T1074.001</id>
+    </mitre>
+    <options>no_full_log</options>
+    <group>dlp_doc_archive,data_staging,sysmon_event_11,</group>
+  </rule>
+
+  <!-- Sysmon Event 1: archive command targeting user profile folder -->
+  <rule id="150222" level="12">
+    <if_sid>61603</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(7z|zip|rar|tar|Compress-Archive|makecab)\s+.*\\Users\\[^\\]+\\[^\\]+</field>
+    <description>DLP: Archive command targeting user profile folder — possible compression of locally collected documents.</description>
+    <mitre>
+      <id>T1560.001</id>
+    </mitre>
+    <options>no_full_log</options>
+    <group>dlp_doc_archive,data_staging,sysmon_event1,</group>
+  </rule>
+
+  <!-- ===== Windows — Tier 3: Archive Transferred to External System ===== -->
+
+  <rule id="150223" level="14">
+    <if_sid>61603</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(curl|wget|Invoke-WebRequest|Invoke-RestMethod|scp|pscp|sftp|ftp|rclone|megacmd|winscp|azcopy)\s+.*\.(zip|7z|rar|tar|gz|tgz|bz2|xz|cab)\b</field>
+    <description>DLP: Archive file referenced in network transfer command — possible exfiltration of collected documents to external system.</description>
+    <mitre>
+      <id>T1048</id>
+      <id>T1567.002</id>
+    </mitre>
+    <options>no_full_log</options>
+    <group>dlp_doc_exfil_external,data_exfiltration,sysmon_event1,</group>
+  </rule>
+
+  <!-- ===== Linux — Tier 1: Document Collection in Local Folders ===== -->
+
+  <!-- Base rule: document file created in user home directory (for frequency counting) -->
+  <rule id="150224" level="3">
+    <if_sid>200155</if_sid>
+    <field name="eventdata.targetFilename" type="pcre2">(?i)^/home/[^/]+/.*\.(docx?|xlsx?|pptx?|pdf|csv|txt|rtf|odt|ods|odp)$</field>
+    <description>DLP: Linux document file created in user home directory — $(eventdata.targetFilename).</description>
+    <mitre>
+      <id>T1074.001</id>
+    </mitre>
+    <options>no_full_log</options>
+    <group>dlp_doc_collection,data_staging,linux,sysmon_event_11,</group>
+  </rule>
+
+  <!-- Frequency: bulk document collection in home directory -->
+  <rule id="150225" level="10" frequency="10" timeframe="300">
+    <if_matched_sid>150224</if_matched_sid>
+    <description>DLP: Linux bulk document collection detected — multiple documents created in user home directory within 5 minutes — possible local data staging.</description>
+    <mitre>
+      <id>T1074.001</id>
+      <id>T1119</id>
+    </mitre>
+    <options>no_full_log</options>
+    <group>dlp_doc_collection,data_staging,linux,sysmon_event_11,</group>
+  </rule>
+
+  <!-- ===== Linux — Tier 2: Archive of Collected Documents ===== -->
+
+  <!-- Sysmon Event 11: archive file created in user home directory (not temp) -->
+  <rule id="150226" level="12">
+    <if_sid>200155</if_sid>
+    <field name="eventdata.targetFilename" type="pcre2">(?i)^/home/[^/]+/.*\.(zip|7z|rar|tar|gz|tgz|bz2|xz|cab)$</field>
+    <description>DLP: Linux archive file created in user home directory by $(eventdata.image) — possible compression of collected documents for exfiltration.</description>
+    <mitre>
+      <id>T1560.001</id>
+      <id>T1074.001</id>
+    </mitre>
+    <options>no_full_log</options>
+    <group>dlp_doc_archive,data_staging,linux,sysmon_event_11,</group>
+  </rule>
+
+  <!-- Sysmon Event 1: archive command targeting user home directory -->
+  <rule id="150227" level="12">
+    <if_sid>200151</if_sid>
+    <field name="eventdata.commandLine" type="pcre2">(?i)(tar\s+.*c[zvf]|zip\s+-r|7z\s+a|gzip|bzip2|xz)\s+.*/home/[^/]+/</field>
+    <description>DLP: Linux archive command targeting user home directory — possible compression of locally collected documents.</description>
+    <mitre>
+      <id>T1560.001</id>
+    </mitre>
+    <options>no_full_log</options>
+    <group>dlp_doc_archive,data_staging,linux,sysmon_event1,</group>
+  </rule>
+
+  <!-- ===== Linux — Tier 3: Archive Transferred to External System ===== -->
+
+  <rule id="150228" level="14">
+    <if_sid>200151</if_sid>
+    <field name="eventdata.commandLine" type="pcre2">(?i)(curl|wget|scp|sftp|rsync|rclone|ftp|megacmd|megacopy)\s+.*\.(zip|7z|rar|tar|gz|tgz|bz2|xz|cab)\b</field>
+    <description>DLP: Linux archive file referenced in network transfer command — possible exfiltration of collected documents to external system.</description>
+    <mitre>
+      <id>T1048</id>
+      <id>T1567.002</id>
+    </mitre>
+    <options>no_full_log</options>
+    <group>dlp_doc_exfil_external,data_exfiltration,linux,sysmon_event1,</group>
+  </rule>
+
+  <!-- ===== macOS — Tier 1: Document Collection in Local Folders ===== -->
+
+  <!-- Base rule: document file created in user directory (for frequency counting) -->
+  <rule id="150229" level="3">
+    <if_sid>200155</if_sid>
+    <field name="eventdata.targetFilename" type="pcre2">(?i)^/Users/[^/]+/.*\.(docx?|xlsx?|pptx?|pdf|csv|txt|rtf|odt|ods|odp)$</field>
+    <description>DLP: macOS document file created in user directory — $(eventdata.targetFilename).</description>
+    <mitre>
+      <id>T1074.001</id>
+    </mitre>
+    <options>no_full_log</options>
+    <group>dlp_doc_collection,data_staging,macos,sysmon_event_11,</group>
+  </rule>
+
+  <!-- Frequency: bulk document collection in user directory -->
+  <rule id="150230" level="10" frequency="10" timeframe="300">
+    <if_matched_sid>150229</if_matched_sid>
+    <description>DLP: macOS bulk document collection detected — multiple documents created in user directory within 5 minutes — possible local data staging.</description>
+    <mitre>
+      <id>T1074.001</id>
+      <id>T1119</id>
+    </mitre>
+    <options>no_full_log</options>
+    <group>dlp_doc_collection,data_staging,macos,sysmon_event_11,</group>
+  </rule>
+
+  <!-- ===== macOS — Tier 2: Archive of Collected Documents ===== -->
+
+  <!-- Sysmon Event 11: archive file created in user directory (not temp) -->
+  <rule id="150231" level="12">
+    <if_sid>200155</if_sid>
+    <field name="eventdata.targetFilename" type="pcre2">(?i)^/Users/[^/]+/.*\.(zip|7z|rar|tar|gz|tgz|bz2|xz|cab|dmg)$</field>
+    <description>DLP: macOS archive file created in user directory by $(eventdata.image) — possible compression of collected documents for exfiltration.</description>
+    <mitre>
+      <id>T1560.001</id>
+      <id>T1074.001</id>
+    </mitre>
+    <options>no_full_log</options>
+    <group>dlp_doc_archive,data_staging,macos,sysmon_event_11,</group>
+  </rule>
+
+  <!-- Sysmon Event 1: archive command targeting user directory -->
+  <rule id="150232" level="12">
+    <if_sid>200151</if_sid>
+    <field name="eventdata.commandLine" type="pcre2">(?i)(tar\s+.*c[zvf]|zip\s+-r|7z\s+a|ditto\s+-c|hdiutil\s+create)\s+.*/Users/[^/]+/</field>
+    <description>DLP: macOS archive command targeting user directory — possible compression of locally collected documents.</description>
+    <mitre>
+      <id>T1560.001</id>
+    </mitre>
+    <options>no_full_log</options>
+    <group>dlp_doc_archive,data_staging,macos,sysmon_event1,</group>
+  </rule>
+
+  <!-- ===== macOS — Tier 3: Archive Transferred to External System ===== -->
+
+  <rule id="150233" level="14">
+    <if_sid>200151</if_sid>
+    <field name="eventdata.commandLine" type="pcre2">(?i)(curl|wget|scp|sftp|rsync|rclone|ftp|megacmd|megacopy)\s+.*\.(zip|7z|rar|tar|gz|tgz|bz2|xz|cab|dmg)\b</field>
+    <field name="eventdata.image" type="pcre2">(?i)^\/(usr\/bin|usr\/local\/bin|opt\/homebrew)</field>
+    <description>DLP: macOS archive file referenced in network transfer command — possible exfiltration of collected documents to external system.</description>
+    <mitre>
+      <id>T1048</id>
+      <id>T1567.002</id>
+    </mitre>
+    <options>no_full_log</options>
+    <group>dlp_doc_exfil_external,data_exfiltration,macos,sysmon_event1,</group>
+  </rule>
+
+  <!-- ===== Office 365 — Document Collection & Archive Exfiltration Pipeline ===== -->
+
+  <!-- Tier 1: Base rule for file copy/move/upload in OneDrive/SharePoint (for frequency counting) -->
+  <rule id="150234" level="3">
+    <if_sid>108000</if_sid>
+    <field name="office_365.Operation" type="pcre2">(?i)^(FileUploaded|FileCopied|FileMoved|FileSyncUploadedFull)$</field>
+    <description>DLP: Office 365 file operation — $(office_365.Operation) on $(office_365.SourceFileName).</description>
+    <options>no_full_log</options>
+    <group>dlp_doc_collection,data_staging,</group>
+  </rule>
+
+  <!-- Tier 1: Frequency — bulk file collection in OneDrive/SharePoint -->
+  <rule id="150235" level="10" frequency="10" timeframe="300">
+    <if_matched_sid>150234</if_matched_sid>
+    <description>DLP: Bulk file collection in Office 365 — multiple files uploaded, copied, or moved within 5 minutes — possible document staging.</description>
+    <mitre>
+      <id>T1074.001</id>
+      <id>T1119</id>
+    </mitre>
+    <options>no_full_log</options>
+    <group>dlp_doc_collection,data_staging,</group>
+  </rule>
+
+  <!-- Tier 2: Archive file uploaded to OneDrive/SharePoint -->
+  <rule id="150236" level="12">
+    <if_sid>108000</if_sid>
+    <field name="office_365.Operation" type="pcre2">(?i)^(FileUploaded|FileSyncUploadedFull|FileCopied|FileMoved)$</field>
+    <field name="office_365.SourceFileName" type="pcre2">(?i)\.(zip|7z|rar|tar|gz|tgz|bz2|xz|cab)$</field>
+    <description>DLP: Archive file uploaded to Office 365 — $(office_365.SourceFileName) — possible staging of compressed document collection.</description>
+    <mitre>
+      <id>T1560.001</id>
+      <id>T1567</id>
+    </mitre>
+    <options>no_full_log</options>
+    <group>dlp_doc_archive,data_staging,</group>
+  </rule>
+
+  <!-- Tier 3: Archive file shared externally from Office 365 -->
+  <rule id="150237" level="14">
+    <if_sid>108000</if_sid>
+    <field name="office_365.Operation" type="pcre2">(?i)^(SharingSet|AnonymousLinkCreated|CompanyLinkCreated|SharingInvitationCreated)$</field>
+    <match type="pcre2">(?i)\.(zip|7z|rar|tar|gz|tgz|bz2|xz|cab)\b</match>
+    <description>DLP: Archive file shared externally from Office 365 — possible exfiltration of collected documents to external party.</description>
+    <mitre>
+      <id>T1048</id>
+      <id>T1567</id>
+    </mitre>
+    <options>no_full_log</options>
+    <group>dlp_doc_exfil_external,data_exfiltration,</group>
+  </rule>
+
+  <!-- ===== Google Workspace — Document Collection & Archive Exfiltration Pipeline ===== -->
+
+  <!-- Tier 1: Base rule for file upload/copy/move in Google Drive (for frequency counting) -->
+  <rule id="150238" level="3">
+    <if_sid>108501</if_sid>
+    <field name="events.name" type="pcre2">(?i)^(upload|copy|move|create|edit)$</field>
+    <description>DLP: Google Drive file operation — $(events.name) — file activity in Drive.</description>
+    <options>no_full_log</options>
+    <group>dlp_doc_collection,data_staging,</group>
+  </rule>
+
+  <!-- Tier 1: Frequency — bulk file collection in Google Drive -->
+  <rule id="150239" level="10" frequency="10" timeframe="300">
+    <if_matched_sid>150238</if_matched_sid>
+    <description>DLP: Bulk file collection in Google Drive — multiple files uploaded, copied, or moved within 5 minutes — possible document staging.</description>
+    <mitre>
+      <id>T1074.001</id>
+      <id>T1119</id>
+    </mitre>
+    <options>no_full_log</options>
+    <group>dlp_doc_collection,data_staging,</group>
+  </rule>
+
+  <!-- Tier 2: Archive file uploaded to Google Drive -->
+  <rule id="150240" level="12">
+    <if_sid>108501</if_sid>
+    <field name="events.name" type="pcre2">(?i)^(upload|copy|move|create)$</field>
+    <match type="pcre2">(?i)\.(zip|7z|rar|tar|gz|tgz|bz2|xz|cab)\b</match>
+    <description>DLP: Archive file uploaded to Google Drive — possible staging of compressed document collection.</description>
+    <mitre>
+      <id>T1560.001</id>
+      <id>T1567</id>
+    </mitre>
+    <options>no_full_log</options>
+    <group>dlp_doc_archive,data_staging,</group>
+  </rule>
+
+  <!-- Tier 3: Archive file shared externally from Google Drive -->
+  <rule id="150241" level="14">
+    <if_sid>108501</if_sid>
+    <field name="events.name" type="pcre2">(?i)^(change_document_access_scope|change_acl_editors|change_user_access)$</field>
+    <match type="pcre2">(?i)\.(zip|7z|rar|tar|gz|tgz|bz2|xz|cab)\b</match>
+    <description>DLP: Archive file shared externally from Google Drive — possible exfiltration of collected documents to external party.</description>
+    <mitre>
+      <id>T1048</id>
+      <id>T1567</id>
+    </mitre>
+    <options>no_full_log</options>
+    <group>dlp_doc_exfil_external,data_exfiltration,</group>
+  </rule>
+
+  <!-- ===== Synology NAS — Document Collection & Archive Exfiltration Pipeline ===== -->
+
+  <!-- Tier 1: Base rule for document file operation on NAS (for frequency counting) -->
+  <rule id="150242" level="3">
+    <if_sid>107150</if_sid>
+    <field name="data" type="pcre2">(?i)\.(docx?|xlsx?|pptx?|pdf|csv|txt|rtf|odt|ods|odp)$</field>
+    <description>DLP: Document file operation on Synology NAS.</description>
+    <group>dlp_doc_collection,dlp_synology,</group>
+  </rule>
+
+  <!-- Tier 1: Frequency — bulk document collection on NAS -->
+  <rule id="150243" level="10" frequency="10" timeframe="300">
+    <if_matched_sid>150242</if_matched_sid>
+    <same_source_ip />
+    <description>DLP: Bulk document collection on Synology NAS — multiple document files operated on within 5 minutes — possible local data staging.</description>
+    <mitre>
+      <id>T1074.001</id>
+      <id>T1119</id>
+    </mitre>
+    <group>dlp_doc_collection,dlp_synology,data_staging,</group>
+  </rule>
+
+  <!-- Tier 3: Archive file on NAS moved to external destination (chains from 150204: archive created on NAS) -->
+  <rule id="150244" level="14">
+    <if_sid>150204</if_sid>
+    <field name="data" type="pcre2">(?i)/(USB|External|Remote|Cloud|backup|offsite)</field>
+    <description>DLP: Archive file on Synology NAS moved to external or off-site destination — possible exfiltration of collected documents.</description>
+    <mitre>
+      <id>T1048</id>
+      <id>T1567</id>
+    </mitre>
+    <group>dlp_doc_exfil_external,dlp_synology,data_exfiltration,</group>
   </rule>
 
 </group>
