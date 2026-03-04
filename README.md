@@ -59,6 +59,31 @@ Provides base detection for Google Workspace audit events ingested via the Wazuh
 
 ---
 
+### Microsoft Purview Rules
+
+**File:** `rules/108600-Microsoft_Purview.xml` · **Decoder:** `decoders/Microsoft_Purview.xml` · **Rule IDs:** 108600–108699 · **29 rules**
+
+Detects security-relevant events from Microsoft Purview ingested via the Wazuh Office 365 module or syslog forwarding. A custom decoder is included to parse syslog-forwarded Purview events.
+
+#### Covered Areas
+
+| Area | Description | Rule IDs |
+|---|---|---|
+| *(all)* | Base Purview event (JSON / syslog) | 108600–108601 |
+| DLP | Data Loss Prevention policy matches and changes | 108610–108614 |
+| Sensitivity Labels | Information protection label events | 108620–108623 |
+| Insider Risk Management | Insider risk alerts and investigations | 108630–108633 |
+| eDiscovery | Content search, export, hold, and case events | 108640–108644 |
+| Communication Compliance | Compliance policy alerts and changes | 108650–108651 |
+| Records Management | Retention label and policy events | 108660–108662 |
+| Audit & Configuration | Audit policy changes and admin role events | 108670–108673 |
+
+#### MITRE ATT&CK Coverage
+
+`T1005` `T1048` `T1078` `T1114.003` `T1562.001`
+
+---
+
 ### Data Loss Prevention (DLP) Rules
 
 **File:** `rules/150000-data_loss_prevention.xml` · **Rule IDs:** 150000–150163 · **114 rules**
@@ -128,6 +153,7 @@ Rules are mapped to the following techniques:
 - [Sysmon](https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon) deployed on monitored endpoints (Windows, Linux, or macOS) for Sysmon-based rules
 - Office 365 and/or AWS integrations configured in Wazuh for the corresponding cloud rules
 - Google Workspace audit log ingestion via the Wazuh gcloud module or custom integration for Google Workspace rules
+- Microsoft Purview audit log ingestion via the Wazuh Office 365 module or syslog forwarding for Purview rules
 - Forcepoint syslog forwarding configured for Forcepoint rules
 
 ## Severity Levels
@@ -165,6 +191,7 @@ To prevent conflicts, each rule file uses a dedicated ID range:
 |---|---|
 | `rules/100725-Forcepoint.xml` | 107250–107254 |
 | `rules/108500-google_workspace.xml` | 108500–108599 |
+| `rules/108600-Microsoft_Purview.xml` | 108600–108699 |
 | `rules/150000-data_loss_prevention.xml` | 150000–150199 |
 
 When adding a new rule file, choose an unused range and document it in this table.
