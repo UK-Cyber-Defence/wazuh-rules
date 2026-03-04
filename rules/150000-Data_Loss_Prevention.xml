@@ -1,6 +1,6 @@
 <!--
   Data Loss Prevention (DLP) Rules
-  Rule IDs: 150000–150212
+  Rule IDs: 150000–150218
   Author:   Peter Bassill /// UK Cyber Defence (peter@cyber-defence.io)
   Detects common data exfiltration, unauthorized transfers,
   and sensitive-data exposure indicators.
@@ -1951,6 +1951,91 @@
       <id>T1110</id>
     </mitre>
     <group>dlp_synology,compromised_account,</group>
+  </rule>
+
+  <!-- =================================================================
+       Email Archive Attachment & Bulk Email Exfiltration Detection
+       Detects archive/compressed files (.gz, .tar, .xz, etc.) sent as
+       email attachments, and alerts when more than 5 emails with
+       attachments are sent within a short timeframe.
+       ================================================================= -->
+
+  <!-- ===== Archive/Compressed File Attachment in Email ===== -->
+
+  <!-- Windows: Archive/compressed file attachment in command-line email -->
+  <rule id="150213" level="12">
+    <if_sid>150006</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)\.(gz|tar|xz|bz2|7z|zip|rar|tgz|cab)\b</field>
+    <description>DLP: Command-line email with archive/compressed file attachment — possible data exfiltration of archived data via email.</description>
+    <mitre>
+      <id>T1048.003</id>
+      <id>T1560.001</id>
+    </mitre>
+    <group>dlp_email_archive_exfil,data_exfiltration,</group>
+  </rule>
+
+  <!-- Linux: Archive/compressed file attachment in command-line email -->
+  <rule id="150214" level="12">
+    <if_sid>150117</if_sid>
+    <field name="eventdata.commandLine" type="pcre2">(?i)\.(gz|tar|xz|bz2|7z|zip|rar|tgz|cab)\b</field>
+    <description>DLP: Linux command-line email with archive/compressed file attachment — possible data exfiltration of archived data via email.</description>
+    <mitre>
+      <id>T1048.003</id>
+      <id>T1560.001</id>
+    </mitre>
+    <options>no_full_log</options>
+    <group>dlp_email_archive_exfil,data_exfiltration,linux,sysmon_event1,</group>
+  </rule>
+
+  <!-- Office 365: Email sent with archive/compressed file attachment -->
+  <rule id="150215" level="12">
+    <if_sid>108000</if_sid>
+    <field name="office_365.Operation" type="pcre2">(?i)^(Send|SendAs|SendOnBehalf)$</field>
+    <match type="pcre2">(?i)\.(gz|tar|xz|bz2|7z|zip|rar|tgz|cab)\b</match>
+    <description>DLP: Office 365 email sent with archive/compressed file attachment — possible data exfiltration via email.</description>
+    <mitre>
+      <id>T1048.003</id>
+      <id>T1560.001</id>
+    </mitre>
+    <options>no_full_log</options>
+    <group>dlp_email_archive_exfil,data_exfiltration,</group>
+  </rule>
+
+  <!-- ===== Frequency-based Bulk Email Exfiltration (>5 emails with attachments) ===== -->
+
+  <!-- Windows: Multiple (>5) emails with attachments in 5 minutes -->
+  <rule id="150216" level="14" frequency="6" timeframe="300">
+    <if_matched_sid>150006</if_matched_sid>
+    <description>DLP: Multiple (>5) command-line emails with attachments sent — possible bulk data exfiltration via email.</description>
+    <mitre>
+      <id>T1048.003</id>
+      <id>T1020</id>
+    </mitre>
+    <group>dlp_email_bulk_exfil,data_exfiltration,</group>
+  </rule>
+
+  <!-- Linux: Multiple (>5) emails with attachments in 5 minutes -->
+  <rule id="150217" level="14" frequency="6" timeframe="300">
+    <if_matched_sid>150117</if_matched_sid>
+    <description>DLP: Multiple (>5) Linux command-line emails with attachments sent — possible bulk data exfiltration via email.</description>
+    <mitre>
+      <id>T1048.003</id>
+      <id>T1020</id>
+    </mitre>
+    <options>no_full_log</options>
+    <group>dlp_email_bulk_exfil,data_exfiltration,linux,</group>
+  </rule>
+
+  <!-- Office 365: Multiple (>5) emails with archive/compressed attachments in 5 minutes -->
+  <rule id="150218" level="14" frequency="6" timeframe="300">
+    <if_matched_sid>150215</if_matched_sid>
+    <description>DLP: Multiple (>5) Office 365 emails sent with archive/compressed attachments — possible bulk data exfiltration via email.</description>
+    <mitre>
+      <id>T1048.003</id>
+      <id>T1020</id>
+    </mitre>
+    <options>no_full_log</options>
+    <group>dlp_email_bulk_exfil,data_exfiltration,</group>
   </rule>
 
 </group>
