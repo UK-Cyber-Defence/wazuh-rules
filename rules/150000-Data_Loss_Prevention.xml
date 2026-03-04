@@ -1,8 +1,9 @@
 <!--
   Data Loss Prevention (DLP) Rules
-  Rule IDs: 150000–150199
+  Rule IDs: 150000–150212
   Author:   Peter Bassill /// UK Cyber Defence (peter@cyber-defence.io)
-  Detects common data exfiltration, unauthorized transfers, and sensitive-data exposure indicators.
+  Detects common data exfiltration, unauthorized transfers,
+  and sensitive-data exposure indicators.
 
   Windows Sysmon Events Leveraged:
     Event  1 (61603)  — Process Creation: exfil tools, archive commands, credential dumpers
@@ -28,6 +29,12 @@
                                 DLP rule triggers, Vault exports, OAuth tokens,
                                 admin role changes, group/2SV policy changes
     AWS CloudWatch (100030)
+
+  Synology NAS (107150–107163):
+    WinFileService — File operations: bulk deletion, renaming, sensitive directory
+                     access, large transfers, archive staging, credential files
+    Connection     — Shared folder access via uncommon protocols, auth correlation
+    Backup         — External backup destinations, backup task removal
 -->
 
 <group name="dlp,data_loss_prevention,">
@@ -1784,6 +1791,166 @@
     </mitre>
     <options>no_full_log</options>
     <group>dlp_gws_mass_download,data_exfiltration,</group>
+  </rule>
+
+  <!-- ========================================================================
+       Synology NAS — DLP Rules  (150200–150212)
+       Detects data exfiltration, bulk operations, and sensitive-data access
+       on Synology storage arrays via WinFileService, Connection, and Backup
+       logs decoded by the synology-winfileservice, synology-connection, and
+       synology-backup decoders.
+       ======================================================================== -->
+
+  <!-- Bulk file deletion on NAS — data destruction or exfiltration cover-up -->
+  <rule id="150200" level="12" frequency="20" timeframe="120">
+    <if_matched_sid>107151</if_matched_sid>
+    <same_source_ip />
+    <description>DLP: Mass file deletion on Synology NAS — possible data destruction or exfiltration cover-up.</description>
+    <mitre>
+      <id>T1485</id>
+      <id>T1070.004</id>
+    </mitre>
+    <group>dlp_synology,data_destruction,</group>
+  </rule>
+
+  <!-- Bulk file rename on NAS — possible ransomware -->
+  <rule id="150201" level="14" frequency="20" timeframe="120">
+    <if_matched_sid>107152</if_matched_sid>
+    <same_source_ip />
+    <description>DLP: Mass file renaming on Synology NAS — possible ransomware activity.</description>
+    <mitre>
+      <id>T1486</id>
+    </mitre>
+    <group>dlp_synology,ransomware,</group>
+  </rule>
+
+  <!-- File operation in a sensitive directory -->
+  <rule id="150202" level="10">
+    <if_sid>107150</if_sid>
+    <field name="data" type="pcre2">(?i)/(Finance|HR|Confidential|Legal|Payroll|Contracts|Executive|Board|PII|GDPR|Sensitive)</field>
+    <description>DLP: File operation in sensitive directory on Synology NAS.</description>
+    <mitre>
+      <id>T1005</id>
+      <id>T1039</id>
+    </mitre>
+    <group>dlp_synology,sensitive_access,</group>
+  </rule>
+
+  <!-- Large file operation (GB/TB range) -->
+  <rule id="150203" level="10">
+    <if_sid>107150</if_sid>
+    <field name="size_unit" type="pcre2">(?i)^(GB|TB)$</field>
+    <description>DLP: Large file operation on Synology NAS — file size in GB/TB range.</description>
+    <mitre>
+      <id>T1030</id>
+    </mitre>
+    <group>dlp_synology,large_transfer,</group>
+  </rule>
+
+  <!-- Archive/compressed file created on NAS — data staging -->
+  <rule id="150204" level="10">
+    <if_sid>107154</if_sid>
+    <field name="data" type="pcre2">(?i)\.(zip|rar|7z|tar|gz|bz2|xz|cab|iso|img)$</field>
+    <description>DLP: Archive or compressed file created on Synology NAS — possible data staging for exfiltration.</description>
+    <mitre>
+      <id>T1560.001</id>
+    </mitre>
+    <group>dlp_synology,data_staging,</group>
+  </rule>
+
+  <!-- Sensitive file type accessed (databases, exports, credentials) -->
+  <rule id="150205" level="10">
+    <if_sid>107150</if_sid>
+    <field name="data" type="pcre2">(?i)\.(pst|ost|mbox|sql|bak|mdf|ldf|csv|xlsx|kdbx|pfx|pem|key|p12|jks|wallet|sav)$</field>
+    <description>DLP: Sensitive file type accessed on Synology NAS — database, export, or credential file.</description>
+    <mitre>
+      <id>T1005</id>
+      <id>T1039</id>
+    </mitre>
+    <group>dlp_synology,sensitive_file_type,</group>
+  </rule>
+
+  <!-- Excessive file operations — data harvesting -->
+  <rule id="150206" level="12" frequency="50" timeframe="300">
+    <if_matched_sid>107150</if_matched_sid>
+    <same_source_ip />
+    <description>DLP: Excessive file operations on Synology NAS — possible data harvesting or exfiltration.</description>
+    <mitre>
+      <id>T1039</id>
+      <id>T1119</id>
+    </mitre>
+    <group>dlp_synology,data_harvesting,</group>
+  </rule>
+
+  <!-- Backup to external/network destination -->
+  <rule id="150207" level="10">
+    <if_sid>107159</if_sid>
+    <field name="backup_location" type="pcre2">(?i)Network|Remote|Cloud|USB|External|rsync|S3|Azure|Google</field>
+    <description>DLP: Synology backup to external or network destination — verify authorised backup target.</description>
+    <mitre>
+      <id>T1537</id>
+      <id>T1567</id>
+    </mitre>
+    <group>dlp_synology,backup_exfil,</group>
+  </rule>
+
+  <!-- Backup task removed — covering tracks -->
+  <rule id="150208" level="12">
+    <if_sid>107163</if_sid>
+    <description>DLP: Synology backup task removed — possible attempt to cover data exfiltration tracks.</description>
+    <mitre>
+      <id>T1070</id>
+    </mitre>
+    <group>dlp_synology,indicator_removal,</group>
+  </rule>
+
+  <!-- Repeated access to sensitive dirs — targeted theft -->
+  <rule id="150209" level="14" frequency="10" timeframe="120">
+    <if_matched_sid>150202</if_matched_sid>
+    <same_source_ip />
+    <description>DLP: Repeated access to sensitive directories on Synology NAS — possible targeted data theft.</description>
+    <mitre>
+      <id>T1005</id>
+      <id>T1039</id>
+      <id>T1567</id>
+    </mitre>
+    <group>dlp_synology,targeted_theft,</group>
+  </rule>
+
+  <!-- Shared folder access via uncommon protocol -->
+  <rule id="150210" level="10">
+    <if_sid>107156</if_sid>
+    <field name="protocol" type="pcre2">(?i)(FTP|WebDAV|NFS)</field>
+    <description>DLP: Synology shared folder accessed via uncommon protocol — possible data exfiltration channel.</description>
+    <mitre>
+      <id>T1048</id>
+    </mitre>
+    <group>dlp_synology,unusual_protocol,</group>
+  </rule>
+
+  <!-- Multiple sensitive file types accessed -->
+  <rule id="150211" level="14" frequency="5" timeframe="300">
+    <if_matched_sid>150205</if_matched_sid>
+    <same_source_ip />
+    <description>DLP: Multiple sensitive files accessed on Synology NAS — possible data exfiltration in progress.</description>
+    <mitre>
+      <id>T1005</id>
+      <id>T1039</id>
+    </mitre>
+    <group>dlp_synology,sensitive_exfil,</group>
+  </rule>
+
+  <!-- File operations after failed auth — compromised account -->
+  <rule id="150212" level="14" timeframe="600">
+    <if_group>synology_file_operation</if_group>
+    <if_matched_group>synology_auth_failure</if_matched_group>
+    <same_source_ip />
+    <description>DLP: File operations on Synology NAS after authentication failures — possible compromised account.</description>
+    <mitre>
+      <id>T1078</id>
+      <id>T1110</id>
+    </mitre>
+    <group>dlp_synology,compromised_account,</group>
   </rule>
 
 </group>
