@@ -7,7 +7,7 @@
 <group name="linux,sysmon,">
     <rule id="200150" level="3">
         <decoded_as>sysmon-linux</decoded_as>
-        <field name="system.eventID">\.+</field>
+        <field name="system.eventID">.+</field>
         <description>Sysmon For Linux Event</description>
         <mitre>
          <id>T1204</id>
