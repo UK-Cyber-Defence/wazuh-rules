@@ -13,8 +13,8 @@ nltest:reconnaissance
 dsquery:reconnaissance
 gpresult:reconnaissance
 netstat:reconnaissance
-arp -a:reconnaissance
-route print:reconnaissance
+arp:reconnaissance
+route:reconnaissance
 nslookup:reconnaissance
 ping:reconnaissance
 tracert:reconnaissance
