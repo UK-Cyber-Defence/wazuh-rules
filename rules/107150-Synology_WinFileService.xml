@@ -19,7 +19,7 @@
   <!-- File deletion -->
   <rule id="107151" level="5">
     <if_sid>107150</if_sid>
-    <field name="action" type="pcre2">(?i)^Delete$</field>
+    <match type="pcre2">(?i)Event: Delete,</match>
     <description>Synology NAS: File deleted — $(data).</description>
     <mitre>
       <id>T1070.004</id>
@@ -30,7 +30,7 @@
   <!-- File renaming -->
   <rule id="107152" level="5">
     <if_sid>107150</if_sid>
-    <field name="action" type="pcre2">(?i)^Rename$</field>
+    <match type="pcre2">(?i)Event: Rename,</match>
     <description>Synology NAS: File renamed — $(data).</description>
     <group>synology_file_operation,</group>
   </rule>
@@ -38,7 +38,7 @@
   <!-- File move -->
   <rule id="107153" level="3">
     <if_sid>107150</if_sid>
-    <field name="action" type="pcre2">(?i)^Move$</field>
+    <match type="pcre2">(?i)Event: Move,</match>
     <description>Synology NAS: File moved — $(data).</description>
     <group>synology_file_operation,</group>
   </rule>
@@ -46,7 +46,7 @@
   <!-- File creation -->
   <rule id="107154" level="3">
     <if_sid>107150</if_sid>
-    <field name="action" type="pcre2">(?i)^Create$</field>
+    <match type="pcre2">(?i)Event: Create,</match>
     <description>Synology NAS: File created — $(data).</description>
     <group>synology_file_operation,</group>
   </rule>
@@ -54,7 +54,7 @@
   <!-- File read/open -->
   <rule id="107155" level="1">
     <if_sid>107150</if_sid>
-    <field name="action" type="pcre2">(?i)^(Read|Open)$</field>
+    <match type="pcre2">(?i)Event: (?:Read|Open),</match>
     <description>Synology NAS: File accessed — $(data).</description>
     <group>synology_file_operation,</group>
   </rule>
