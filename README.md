@@ -8,7 +8,7 @@ This repository provides production-ready Wazuh rule files that extend the defau
 
 ### Forcepoint Rules
 
-**File:** `rules/100725-Forcepoint.xml` · **Decoder:** `decoders/Forcepoint.xml` · **Rule IDs:** 107250–107254 · **5 rules**
+**File:** `rules/107250-Forcepoint.xml` · **Decoder:** `decoders/Forcepoint.xml` · **Rule IDs:** 107250–107254 · **5 rules**
 
 Detects security-relevant events from Forcepoint appliances including blocked traffic, failed authentication, system errors, and password changes. A custom decoder is included to parse Forcepoint traffic, system, and audit log formats.
 
@@ -217,7 +217,7 @@ To prevent conflicts, each rule file uses a dedicated ID range:
 
 | File | ID Range |
 |---|---|
-| `rules/100725-Forcepoint.xml` | 107250–107254 |
+| `rules/107250-Forcepoint.xml` | 107250–107254 |
 | `rules/108500-google_workspace.xml` | 108500–108599 |
 | `rules/108600-Microsoft_Purview.xml` | 108600–108699 |
 | `rules/108700-Proofpoint.xml` | 108700–108799 |
