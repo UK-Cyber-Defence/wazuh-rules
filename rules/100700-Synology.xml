@@ -1,59 +1,59 @@
 <group name="synology,syslog,">
   <!-- Base rule to match Synology logs -->
-  <rule id="107140" level="0">
+  <rule id="100700" level="0">
     <program_name>synologyevent</program_name>
     <description>Synology NAS log detected</description>
   </rule>
 
   <!-- Login Success -->
-  <rule id="107141" level="3">
-    <if_sid>107140</if_sid>
+  <rule id="100701" level="3">
+    <if_sid>100700</if_sid>
     <match>login succeeded</match>
     <description>Synology NAS: Login succeeded</description>
     <group>authentication_success,</group>
   </rule>
 
   <!-- Login Failure -->
-  <rule id="107142" level="10">
-    <if_sid>107140</if_sid>
+  <rule id="100702" level="10">
+    <if_sid>100700</if_sid>
     <match>login failed</match>
     <description>Synology NAS: Login failed</description>
     <group>authentication_failed,</group>
   </rule>
 
   <!-- System Reboot -->
-  <rule id="107143" level="5">
-    <if_sid>107140</if_sid>
+  <rule id="100703" level="5">
+    <if_sid>100700</if_sid>
     <match>System started</match>
     <description>Synology NAS: System startup detected</description>
   </rule>
 
   <!-- Volume Error -->
-  <rule id="107144" level="10">
-    <if_sid>107140</if_sid>
+  <rule id="100704" level="10">
+    <if_sid>100700</if_sid>
     <match>volume.*error</match>
     <description>Synology NAS: Volume error detected</description>
     <group>hardware,</group>
   </rule>
 
   <!-- Drive Failure -->
-  <rule id="107145" level="12">
-    <if_sid>107140</if_sid>
+  <rule id="100705" level="12">
+    <if_sid>100700</if_sid>
     <match>drive.*failed</match>
     <description>Synology NAS: Drive failure</description>
     <group>hardware,</group>
   </rule>
 
   <!-- Firmware Upgrade -->
-  <rule id="107146" level="3">
-    <if_sid>107140</if_sid>
+  <rule id="100706" level="3">
+    <if_sid>100700</if_sid>
     <match>firmware upgrade completed</match>
     <description>Synology NAS: Firmware upgrade completed</description>
     <group>update,</group>
   </rule>
   
   <!-- Multiple login failures followed by success -->
-  <rule id="107147" level="16" timeframe="360">
+  <rule id="100707" level="16" timeframe="360">
     <if_group>authentication_success</if_group>
     <if_matched_group>authentication_failed</if_matched_group>
     <same_source_ip />
@@ -64,106 +64,5 @@
     </mitre>
     <group>authentication_bruteforce,pci_dss_10.2.4,pci_dss_10.2.5,pci_dss_11.4,gpg13_7.1,gpg13_7.8,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.14,nist_800_53_AC.7,nist_800_53_SI.4,tsc_CC6.1,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
   </rule>
-
-  <!-- ===== Synology WinFileService (file operation) rules ===== -->
-
-  <rule id="107150" level="0">
-    <decoded_as>synology-winfileservice</decoded_as>
-    <description>Synology NAS: File operation detected via WinFileService.</description>
-    <group>synology_file_operation,</group>
-  </rule>
-
-  <rule id="107151" level="3">
-    <if_sid>107150</if_sid>
-    <field name="action">delete</field>
-    <description>Synology NAS: File deleted.</description>
-    <group>synology_file_delete,</group>
-  </rule>
-
-  <rule id="107152" level="3">
-    <if_sid>107150</if_sid>
-    <field name="action">rename</field>
-    <description>Synology NAS: File renamed.</description>
-    <group>synology_file_rename,</group>
-  </rule>
-
-  <rule id="107153" level="0">
-    <if_sid>107150</if_sid>
-    <field name="action" type="pcre2">(?i)(?:read|open|access)</field>
-    <description>Synology NAS: File accessed.</description>
-    <group>synology_file_access,</group>
-  </rule>
-
-  <rule id="107154" level="3">
-    <if_sid>107150</if_sid>
-    <field name="action" type="pcre2">(?i)(?:write|create)</field>
-    <description>Synology NAS: File created or written.</description>
-    <group>synology_file_write,</group>
-  </rule>
-
-  <!-- ===== Synology Connection rules ===== -->
-
-  <rule id="107155" level="0">
-    <decoded_as>synology-connection</decoded_as>
-    <description>Synology NAS: Connection event detected.</description>
-    <group>synology_connection,</group>
-  </rule>
-
-  <rule id="107156" level="3">
-    <if_sid>107155</if_sid>
-    <field name="status">access</field>
-    <description>Synology NAS: Shared folder accessed.</description>
-    <group>synology_share_access,</group>
-  </rule>
-
-  <rule id="107157" level="3">
-    <if_sid>107155</if_sid>
-    <field name="status">success</field>
-    <description>Synology NAS: Successful connection.</description>
-    <group>authentication_success,synology_auth_success,</group>
-  </rule>
-
-  <rule id="107158" level="10">
-    <if_sid>107155</if_sid>
-    <field name="status">fail</field>
-    <description>Synology NAS: Failed connection attempt.</description>
-    <group>authentication_failed,synology_auth_failure,</group>
-  </rule>
-
-  <!-- ===== Synology Backup rules ===== -->
-
-  <rule id="107159" level="0">
-    <decoded_as>synology-backup</decoded_as>
-    <description>Synology NAS: Backup event detected.</description>
-    <group>synology_backup,</group>
-  </rule>
-
-  <rule id="107160" level="3">
-    <if_sid>107159</if_sid>
-    <field name="status">success</field>
-    <description>Synology NAS: Backup task completed successfully.</description>
-    <group>synology_backup_success,</group>
-  </rule>
-
-  <rule id="107161" level="10">
-    <if_sid>107159</if_sid>
-    <field name="status">fail</field>
-    <description>Synology NAS: Backup task failed.</description>
-    <group>synology_backup_failure,</group>
-  </rule>
-
-  <rule id="107162" level="7">
-    <if_sid>107159</if_sid>
-    <field name="status" type="pcre2">(?:cancel|skip)</field>
-    <description>Synology NAS: Backup task cancelled or skipped.</description>
-    <group>synology_backup_cancelled,</group>
-  </rule>
-
-  <rule id="107163" level="10">
-    <if_sid>107159</if_sid>
-    <field name="action">removed</field>
-    <description>Synology NAS: Backup task removed.</description>
-    <group>synology_backup_removed,</group>
-  </rule>
-
+  
 </group>
