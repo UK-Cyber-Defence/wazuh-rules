@@ -1,6 +1,6 @@
 <group name="invisibleferret,">
 
-  <rule id="999501" level="7">
+  <rule id="999506" level="7">
     <if_sid>200155</if_sid>
     <field name="eventdata.image" type="pcre2">\/usr\/bin\/python(\d+\.\d+).*?</field>
     <field name="eventdata.targetFilename" type="pcre2">\/tmp\/([a-zA-Z0-9]{8}).*?</field>
@@ -10,7 +10,7 @@
     </mitre>
   </rule>
 
-  <rule id="999502" level="7">
+  <rule id="999507" level="7">
     <if_sid>200157</if_sid>
     <field name="eventdata.image" type="pcre2">\/usr\/bin\/python(\d+\.\d+).*?</field>
     <field name="eventdata.targetFilename" type="pcre2">\/tmp\/([a-zA-Z0-9]{8}).*?</field>
@@ -21,7 +21,7 @@
     </mitre>
   </rule>
    
-  <rule id="999503" level="7">
+  <rule id="999508" level="7">
     <if_sid>200152</if_sid>
     <field name="eventdata.image" type="pcre2">\/usr\/bin\/python(\d+\.\d+).*?</field>
     <field name="eventdata.destinationIp" type="pcre2">(127\.0\.0\.1)</field>
@@ -33,7 +33,7 @@
     </mitre>
   </rule>
 
-  <rule id="999504" level="12">
+  <rule id="999509" level="12">
     <if_sid>200152</if_sid>
     <field name="eventdata.image" type="pcre2">\/usr\/bin\/python(\d+\.\d+).*?</field>
     <field name="eventdata.sourceIp" type="pcre2">(\d+\.\d+\.\d+\.\d+)</field>
@@ -45,7 +45,7 @@
     </mitre>
   </rule>
 
- <rule id="999505" level="12">
+ <rule id="999510" level="12">
     <if_sid>200152</if_sid>
     <field name="eventdata.image" type="pcre2">\/usr\/bin\/python(\d+\.\d+).*?</field>
     <field name="eventdata.sourceIp" type="pcre2">(\d+\.\d+\.\d+\.\d+)</field>
