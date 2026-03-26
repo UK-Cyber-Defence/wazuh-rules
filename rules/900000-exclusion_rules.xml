@@ -1746,19 +1746,4 @@
   <options>no_full_log</options>
 </rule>
 
-
-  <rule id="900229" level="1">
-    <if_sid>91822</if_sid>
-    <field name="data.win.system.message">(?i)NinjaRMM</field>
-    <description>NinjaRMM Reclassification</description>
-    <options>no_full_log</options>
-  </rule>
-  <rule id="900230" level="1">
-    <if_sid>91823</if_sid>
-    <field name="data.win.system.message">(?i)NinjaRMM</field>
-    <description>NinjaRMM Reclassification</description>
-    <options>no_full_log</options>
-  </rule>
-
-
 </group>
