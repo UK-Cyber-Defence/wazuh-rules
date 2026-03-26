@@ -1827,7 +1827,7 @@
   <!-- File operation in a sensitive directory -->
   <rule id="150202" level="10">
     <if_sid>107150</if_sid>
-    <field name="data" type="pcre2">(?i)/(Finance|HR|Confidential|Legal|Payroll|Contracts|Executive|Board|PII|GDPR|Sensitive)</field>
+    <match type="pcre2">(?i)/(Finance|HR|Confidential|Legal|Payroll|Contracts|Executive|Board|PII|GDPR|Sensitive)</match>
     <description>DLP: File operation in sensitive directory on Synology NAS.</description>
     <mitre>
       <id>T1005</id>
@@ -1850,7 +1850,7 @@
   <!-- Archive/compressed file created on NAS — data staging -->
   <rule id="150204" level="10">
     <if_sid>107154</if_sid>
-    <field name="data" type="pcre2">(?i)\.(zip|rar|7z|tar|gz|bz2|xz|cab|iso|img)$</field>
+    <match type="pcre2">(?i)\.(zip|rar|7z|tar|gz|bz2|xz|cab|iso|img), File</match>
     <description>DLP: Archive or compressed file created on Synology NAS — possible data staging for exfiltration.</description>
     <mitre>
       <id>T1560.001</id>
@@ -1861,7 +1861,7 @@
   <!-- Sensitive file type accessed (databases, exports, credentials) -->
   <rule id="150205" level="10">
     <if_sid>107150</if_sid>
-    <field name="data" type="pcre2">(?i)\.(pst|ost|mbox|sql|bak|mdf|ldf|csv|xlsx|kdbx|pfx|pem|key|p12|jks|wallet|sav)$</field>
+    <match type="pcre2">(?i)\.(pst|ost|mbox|sql|bak|mdf|ldf|csv|xlsx|kdbx|pfx|pem|key|p12|jks|wallet|sav), File</match>
     <description>DLP: Sensitive file type accessed on Synology NAS — database, export, or credential file.</description>
     <mitre>
       <id>T1005</id>
@@ -1920,7 +1920,7 @@
   <!-- Shared folder access via uncommon protocol -->
   <rule id="150210" level="10">
     <if_sid>107156</if_sid>
-    <field name="protocol" type="pcre2">(?i)(FTP|WebDAV|NFS)</field>
+    <match type="pcre2">(?i)via \[(?:FTP|WebDAV|NFS)</match>
     <description>DLP: Synology shared folder accessed via uncommon protocol — possible data exfiltration channel.</description>
     <mitre>
       <id>T1048</id>
@@ -2358,7 +2358,7 @@
   <!-- Tier 1: Base rule for document file operation on NAS (for frequency counting) -->
   <rule id="150242" level="3">
     <if_sid>107150</if_sid>
-    <field name="data" type="pcre2">(?i)\.(docx?|xlsx?|pptx?|pdf|csv|txt|rtf|odt|ods|odp)$</field>
+    <match type="pcre2">(?i)\.(docx?|xlsx?|pptx?|pdf|csv|txt|rtf|odt|ods|odp), File</match>
     <description>DLP: Document file operation on Synology NAS.</description>
     <group>dlp_doc_collection,dlp_synology,</group>
   </rule>
@@ -2378,7 +2378,7 @@
   <!-- Tier 3: Archive file on NAS moved to external destination (chains from 150204: archive created on NAS) -->
   <rule id="150244" level="14">
     <if_sid>150204</if_sid>
-    <field name="data" type="pcre2">(?i)/(USB|External|Remote|Cloud|backup|offsite)</field>
+    <match type="pcre2">(?i)/(USB|External|Remote|Cloud|backup|offsite)</match>
     <description>DLP: Archive file on Synology NAS moved to external or off-site destination — possible exfiltration of collected documents.</description>
     <mitre>
       <id>T1048</id>
