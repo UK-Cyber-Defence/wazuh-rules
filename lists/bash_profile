@@ -1,0 +1,7 @@
+/root/.bashrc:bash_profile
+/root/.bash_profile:bash_profile
+/root/.profile:bash_profile
+/home:bash_profile
+/etc/profile:bash_profile
+/etc/profile.d:bash_profile
+/etc/bash.bashrc:bash_profile
